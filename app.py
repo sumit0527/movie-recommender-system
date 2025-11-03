@@ -2,6 +2,8 @@ import streamlit as st
 import pickle
 import pandas as pd
 from modules.recommendation import recommend
+import gdown
+import os
 
 # ------------------------------------------------------------
 # 🎬 MOVIE RECOMMENDER SYSTEM - MAIN APPLICATION
@@ -9,6 +11,14 @@ from modules.recommendation import recommend
 # This Streamlit application allows users to select a movie
 # and get top 5 similar movies with their posters displayed.
 # ------------------------------------------------------------
+
+def load_pickle_from_drive(file_id, filename):
+    """Download a pickle file from Google Drive and load it safely."""
+    output = os.path.join("data", filename)
+    os.makedirs("data", exist_ok=True)  # ensure data folder exists
+    gdown.download(f"https://drive.google.com/uc?id={file_id}", output, quiet=False)
+    with open(output, "rb") as f:
+        return pickle.load(f)
 
 
 # ------------------------------------------------------------
@@ -18,10 +28,16 @@ st.title("🎬 Movie Recommender System")
 st.markdown("Select a movie from the dropdown below and discover top 5 similar movies!")
 
 # Load pre-trained data (movies and similarity matrix)
-movies_dict = pickle.load(open("data/movies_dict.pkl", "rb"))
+# ------------------------------------------------------------
+# 📦 LOAD DATA
+# ------------------------------------------------------------
+movies_dict_url = r"https://drive.google.com/uc?export=download&id=1gDlygvY0eBPjk23W3VQPgJTkPqdNaXfe"
+similarity_url = r"https://drive.google.com/uc?export=download&id=1JeBho71-k_5KhCal3qeGJdQ_U1361_Hp"
+
+movies_dict = load_pickle_from_drive("1gDlygvY0eBPjk23W3VQPgJTkPqdNaXfe", "movies_dict.pkl")
 movies = pd.DataFrame(movies_dict)
 movies_list = movies['title'].values
-similarity = pickle.load(open("data/similarity.pkl", "rb"))
+similarity = load_pickle_from_drive("1JeBho71-k_5KhCal3qeGJdQ_U1361_Hp", "similarity.pkl")
 
 # ------------------------------------------------------------
 # 🧭 STREAMLIT PAGE CONFIGURATION
@@ -81,4 +97,3 @@ if st.button(label="Recommend"):
 # ------------------------------------------------------------
 # Tip: The app layout is responsive and will adjust automatically
 # on desktop and mobile screens.
-
