@@ -7,6 +7,7 @@ import requests
 # This module retrieves movie posters from the TMDb API
 # using the provided movie ID.
 # ------------------------------------------------------------
+
 def fetch_poster(movie_id):
     """
     Fetch the movie poster URL from the TMDb API for a given movie ID.
