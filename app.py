@@ -5,6 +5,7 @@ from modules.recommendation import recommend
 import gdown
 import os
 
+
 # ------------------------------------------------------------
 # 🎬 MOVIE RECOMMENDER SYSTEM - MAIN APPLICATION
 # ------------------------------------------------------------
@@ -12,14 +13,24 @@ import os
 # and get top 5 similar movies with their posters displayed.
 # ------------------------------------------------------------
 
+
 def load_pickle_from_drive(file_id, filename):
     """Download a pickle file from Google Drive and load it safely."""
+    os.makedirs("data", exist_ok=True)
     output = os.path.join("data", filename)
-    os.makedirs("data", exist_ok=True)  # ensure data folder exists
-    gdown.download(f"https://drive.google.com/uc?id={file_id}", output, quiet=False)
+
+    # Download only if not already present
+    if not os.path.exists(output):
+        gdown.download(f"https://drive.google.com/uc?id={file_id}", output, quiet=False)
+
     with open(output, "rb") as f:
         return pickle.load(f)
 
+
+# ------------------------------------------------------------
+# 🧭 STREAMLIT PAGE CONFIGURATION
+# ------------------------------------------------------------
+st.set_page_config(page_title="Movie Recommender System 🎥", page_icon="🎬")
 
 # ------------------------------------------------------------
 # 🧱 APP TITLE AND DESCRIPTION
@@ -27,24 +38,14 @@ def load_pickle_from_drive(file_id, filename):
 st.title("🎬 Movie Recommender System")
 st.markdown("Select a movie from the dropdown below and discover top 5 similar movies!")
 
-# Load pre-trained data (movies and similarity matrix)
 # ------------------------------------------------------------
-# 📦 LOAD DATA
+# 📦 LOAD DATA FROM GOOGLE DRIVE
 # ------------------------------------------------------------
-movies_dict_url = r"https://drive.google.com/uc?export=download&id=1gDlygvY0eBPjk23W3VQPgJTkPqdNaXfe"
-similarity_url = r"https://drive.google.com/uc?export=download&id=1JeBho71-k_5KhCal3qeGJdQ_U1361_Hp"
-
 movies_dict = load_pickle_from_drive("1gDlygvY0eBPjk23W3VQPgJTkPqdNaXfe", "movies_dict.pkl")
-movies = pd.DataFrame(movies_dict)
-movies_list = movies['title'].values
 similarity = load_pickle_from_drive("1JeBho71-k_5KhCal3qeGJdQ_U1361_Hp", "similarity.pkl")
 
-# ------------------------------------------------------------
-# 🧭 STREAMLIT PAGE CONFIGURATION
-# ------------------------------------------------------------
-st.set_page_config(
-    page_title="Movie Recommender System 🎥", page_icon="🎬"
-)
+movies = pd.DataFrame(movies_dict)
+movies_list = movies['title'].values
 
 # ------------------------------------------------------------
 # 🎞️ MOVIE SELECTION SECTION
