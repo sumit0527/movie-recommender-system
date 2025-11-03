@@ -45,7 +45,7 @@ movie-recommender-system/
 ## ⚙️ Setup Instructions
 ```bash
 # Clone the repo
-git clone <your_repo_url>
+git clone "https://github.com/sumit0527/movie-recommender-system.git"
 
 # Navigate to the folder
 cd movie-recommender-system
