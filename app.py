@@ -2,8 +2,14 @@ import streamlit as st
 import pickle
 import pandas as pd
 from modules.recommendation import recommend
-import gdown
 import os
+
+try:
+    import gdown
+except ModuleNotFoundError:
+    import subprocess
+    subprocess.run(["pip", "install", "gdown"], check=True)
+    import gdown
 
 
 # ------------------------------------------------------------
