@@ -7,94 +7,83 @@ import os
 
 
 # ------------------------------------------------------------
-# 🎬 MOVIE RECOMMENDER SYSTEM - MAIN APPLICATION
+# 🎬 MOVIE RECOMMENDER SYSTEM - STREAMLIT APP
 # ------------------------------------------------------------
-# This Streamlit application allows users to select a movie
-# and get top 5 similar movies with their posters displayed.
+# This app lets users select a movie and get top 5 similar
+# recommendations using pre-trained similarity data.
 # ------------------------------------------------------------
 
 
+# ------------------------------------------------------------
+# ⚙️ HELPER FUNCTION: LOAD PICKLE FROM GOOGLE DRIVE
+# ------------------------------------------------------------
+@st.cache_resource
 def load_pickle_from_drive(file_id, filename):
-    """Download a pickle file from Google Drive and load it safely."""
+    """Download and load pickle files from Google Drive (cached)."""
     os.makedirs("data", exist_ok=True)
-    output = os.path.join("data", filename)
+    output_path = os.path.join("data", filename)
 
     # Download only if not already present
-    if not os.path.exists(output):
-        gdown.download(f"https://drive.google.com/uc?id={file_id}", output, quiet=False)
+    if not os.path.exists(output_path):
+        gdown.download(f"https://drive.google.com/uc?id={file_id}", output_path, quiet=False)
 
-    with open(output, "rb") as f:
+    with open(output_path, "rb") as f:
         return pickle.load(f)
 
 
 # ------------------------------------------------------------
-# 🧭 STREAMLIT PAGE CONFIGURATION
+# 🧭 STREAMLIT CONFIGURATION
 # ------------------------------------------------------------
-st.set_page_config(page_title="Movie Recommender System 🎥", page_icon="🎬")
+st.set_page_config(
+    page_title="Movie Recommender System 🎥",
+    page_icon="🎬",
+    layout="wide",
+)
 
 # ------------------------------------------------------------
-# 🧱 APP TITLE AND DESCRIPTION
+# 🧱 PAGE TITLE
 # ------------------------------------------------------------
 st.title("🎬 Movie Recommender System")
-st.markdown("Select a movie from the dropdown below and discover top 5 similar movies!")
+st.markdown("### Discover top 5 similar movies based on your favorite film!")
 
 # ------------------------------------------------------------
-# 📦 LOAD DATA FROM GOOGLE DRIVE
+# 📦 LOAD DATA
 # ------------------------------------------------------------
-movies_dict = load_pickle_from_drive("1gDlygvY0eBPjk23W3VQPgJTkPqdNaXfe", "movies_dict.pkl")
-similarity = load_pickle_from_drive("1JeBho71-k_5KhCal3qeGJdQ_U1361_Hp", "similarity.pkl")
-
-movies = pd.DataFrame(movies_dict)
-movies_list = movies['title'].values
+try:
+    movies_dict = load_pickle_from_drive("1gDlygvY0eBPjk23W3VQPgJTkPqdNaXfe", "movies_dict.pkl")
+    similarity = load_pickle_from_drive("1JeBho71-k_5KhCal3qeGJdQ_U1361_Hp", "similarity.pkl")
+    movies = pd.DataFrame(movies_dict)
+    movies_list = movies['title'].values
+except Exception as e:
+    st.error(f"❌ Failed to load model files: {e}")
+    st.stop()
 
 # ------------------------------------------------------------
 # 🎞️ MOVIE SELECTION SECTION
 # ------------------------------------------------------------
-selected_movie_name = st.selectbox("Choose Movie:", movies_list)
+selected_movie_name = st.selectbox("🎥 Choose a movie to get recommendations:", movies_list)
 
 # ------------------------------------------------------------
 # 🔘 RECOMMENDATION BUTTON
 # ------------------------------------------------------------
-if st.button(label="Recommend"):
-    recommended_movie_names, recommended_movie_posters = recommend(selected_movie_name, movies, similarity)
+if st.button("Recommend 🎯"):
+    try:
+        recommended_movie_names, recommended_movie_posters = recommend(selected_movie_name, movies, similarity)
 
-    # Display 5 movies in columns
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    # Show movie poster &  Display movie title
-    with col1:
-        st.image(
-            recommended_movie_posters[0],
-            caption=recommended_movie_names[0],
-            use_container_width=True,
-        )
-    with col2:
-        st.image(
-            recommended_movie_posters[1],
-            caption=recommended_movie_names[1],
-            use_container_width=True,
-        )
-    with col3:
-        st.image(
-            recommended_movie_posters[2],
-            caption=recommended_movie_names[2],
-            use_container_width=True,
-        )
-    with col4:
-        st.image(
-            recommended_movie_posters[3],
-            caption=recommended_movie_names[3],
-            use_container_width=True,
-        )
-    with col5:
-        st.image(
-            recommended_movie_posters[4],
-            caption=recommended_movie_names[4],
-            use_container_width=True,
-        )
+        # Display results in 5 columns
+        cols = st.columns(5)
+        for i, col in enumerate(cols):
+            with col:
+                st.image(
+                    recommended_movie_posters[i],
+                    caption=recommended_movie_names[i],
+                    use_container_width=True
+                )
+    except Exception as e:
+        st.error(f"⚠️ Error while generating recommendations: {e}")
 
 # ------------------------------------------------------------
-# ⚙️ END OF APPLICATION
+# 🧾 FOOTER
 # ------------------------------------------------------------
-# Tip: The app layout is responsive and will adjust automatically
-# on desktop and mobile screens.
+st.markdown("---")
+st.caption("Developed by **Sumit Patil** | Powered by Streamlit 🚀")
