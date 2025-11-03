@@ -1,3 +1,5 @@
+from modules.fetch_posters import fetch_poster
+
 # ------------------------------------------------------------
 # 🎬 RECOMMENDATION LOGIC MODULE
 # ------------------------------------------------------------
@@ -35,10 +37,15 @@ def recommend(movie, movies, similarity):
     # Step 4️⃣ — Fetch movie titles and posters
     # --------------------------------------------------------
     recommended_movies = []
+    recommended_movies_posters = []
     for i in movies_list:
+        movie_id = movies.iloc[i[0]].movie_id
         recommended_movies.append(movies.iloc[i[0]].title)
+
+        # fetch poster from API
+        recommended_movies_posters.append(fetch_poster(movie_id))
 
     # --------------------------------------------------------
     # Step 5️⃣ — Return the top 5 recommended movies with posters
     # --------------------------------------------------------
-    return recommended_movies
+    return recommended_movies,recommended_movies_posters
